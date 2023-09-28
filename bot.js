@@ -25,6 +25,7 @@ client.login(bot_token);
 client.on('message', async (message) => {
     if (message.content.startsWith('!dalle')) {
         const query = message.content.slice(7); // remove "!dalle" prefix
+        // check for empty query
         const generatedImage = await generateImage(query);
         message.channel.send({ files: [generatedImage] });
     }
