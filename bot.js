@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits} = require('discord.js');
 const OpenAIApi = require("openai");
+const dotenv = require('dotenv');
 
 const intentList = [
     GatewayIntentBits.Guilds,
@@ -9,6 +10,8 @@ const intentList = [
 
 const client = new Client({intents: intentList});
 const bot_token = 'YOUR_DISCORD_BOT_TOKEN'
+
+dotenv.config();
 const openai = new OpenAIApi({
     apiKey: process.env.OPENAI_API_KEY,
 });
