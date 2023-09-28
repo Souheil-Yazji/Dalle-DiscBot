@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits} = require('discord.js');
+const { Client,Events, GatewayIntentBits} = require('discord.js');
 const OpenAIApi = require("openai");
 const dotenv = require('dotenv');
 
