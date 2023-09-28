@@ -1,18 +1,23 @@
-const Discord = require('discord.js');
-const { Configuration, OpenAIApi } = require("openai");
+const { Client, GatewayIntentBits} = require('discord.js');
+const OpenAIApi = require("openai");
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
+const intentList = [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+]
+
+const client = new Client({intents: intentList});
+const bot_token = 'YOUR_DISCORD_BOT_TOKEN'
+const openai = new OpenAIApi({
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
-const client = new Discord.Client();
-const bot_token = 'YOUR_DISCORD_BOT_TOKEN'
-const openai = new OpenAIApi(configuration);
-
-
-client.on('ready', () => {
+client.once(Events.ClientReady, c => {
     console.log('Logged in ass ${client.user.tag}');
 });
+
+client.login(bot_token);
 
 client.on('message', async(message) => {
     if (message.content.startsWith('!dalle')) {
