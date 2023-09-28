@@ -1,25 +1,25 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const OpenAIApi = require("openai");
 const dotenv = require('dotenv');
+const { Console } = require('console');
 
 const intentList = [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
 ]
-
 const client = new Client({ intents: intentList });
-const bot_token = 'YOUR_DISCORD_BOT_TOKEN'
 
 dotenv.config();
+
+const bot_token = process.env.DISCORD_BOT_TOKEN
 const openai = new OpenAIApi({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 client.once(Events.ClientReady, c => {
-    console.log('Logged in ass ${client.user.tag}');
+    console.log(`Logged in as ${c.user.tag}`);
 });
-
 client.login(bot_token);
 
 client.on('message', async (message) => {
