@@ -1,54 +1,40 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
-const OpenAIApi = require("openai");
+const OpenAI = require('openai');
 const dotenv = require('dotenv');
-const { Console } = require('console');
-
-const intentList = [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-]
-const client = new Client({ intents: intentList });
+const { generateImage } = require('./lib/imageGenerator');
 
 dotenv.config();
 
-const bot_token = process.env.DISCORD_BOT_TOKEN
-const openai = new OpenAIApi({
-    apiKey: process.env.OPENAI_API_KEY,
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
-client.once(Events.ClientReady, c => {
-    console.log(`Logged in as ${c.user.tag}`);
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+client.once(Events.ClientReady, (c) => {
+  console.log(`Logged in as ${c.user.tag}`);
 });
-client.login(bot_token);
 
-client.on('message', async (message) => {
-    if (message.content.startsWith('!dalle')) {
-        const query = message.content.slice(7); // remove "!dalle" prefix
-        // check for empty query
-        const generatedImage = await generateImage(query);
-        message.channel.send({ files: [generatedImage] });
-    }
-})
+client.on(Events.MessageCreate, async (message) => {
+  if (!message.content.startsWith('!dalle')) {
+    return;
+  }
 
-async function generateImage(query) {
-    try {
-        const response = await openai.createImage({
-            prompt: query,
-            n: 1,
-            model: 'dalle'
-        });
+  if (message.author.bot) {
+    return;
+  }
 
+  try {
+    const imageUrl = await generateImage(message.content, openai);
+    await message.reply({ content: 'Here is your generated image:', files: [{ attachment: imageUrl }] });
+  } catch (error) {
+    console.error('Image generation failed:', error);
+    await message.reply(error.message || 'Image generation failed. Please try again later.');
+  }
+});
 
-        const imageId = response.id;
-        const imageUrl = response.output.url;
-
-        const imageResponse = await openai.retrieveImage(imageId);
-
-        const attachment = new Discord.MessageAttachment(imageResponse, 'generated_image.png');
-        return attachment;
-    } catch (error) {
-        console.error('An error occurred while generating the image:', error);
-        throw new Error('Image generation failed. Please try again later.');
-    }
-}
+client.login(process.env.DISCORD_BOT_TOKEN);
